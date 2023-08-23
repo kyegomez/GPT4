@@ -46,7 +46,7 @@ output = model(text, img)
 ```
 
 
-### 📚 Training
+# 📚 Training
 
 ```python
 from gpt4 import train
