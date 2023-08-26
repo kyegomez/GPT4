@@ -12,7 +12,7 @@ import torch.distributed as dist
 from accelerate import Accelerator
 from accelerate.logging import get_logger
 from accelerate.state import AcceleratorState
-from accelerate.utils import DummyOptim, InitProcessGroupKwargs
+from accelerate.utils import InitProcessGroupKwargs
 from datasets import load_dataset
 from lion_pytorch import Lion
 from torch.distributed.algorithms._checkpoint.checkpoint_wrapper import (
@@ -20,7 +20,6 @@ from torch.distributed.algorithms._checkpoint.checkpoint_wrapper import (
     apply_activation_checkpointing,
     checkpoint_wrapper,
 )
-
 from torch.distributed.fsdp import (
     BackwardPrefetch,
     FullyShardedDataParallel,
@@ -40,8 +39,8 @@ from transformers import (
     set_seed,
 )
 
-from gpt4.model import Transformer
 from gpt4.gpt4 import GPT4
+from gpt4.model import Transformer
 from gpt4.utils.stable_adam import StableAdamWUnfused
 
 # state = AcceleratorState()
@@ -377,16 +376,10 @@ def decoupled_optimizer(
         optimizer = Lion(grouped_params, lr=learning_rate, betas=(beta_1, beta_2),)
     elif optimizer_type == "adamw":
         optimizer = AdamW(grouped_params, lr=learning_rate, betas=(beta_1, beta_2),)
-    elif optimizer_type == "deepspeed":
-        optimizer = DummyOptim(grouped_params, lr=learning_rate, betas=(beta_1, beta_2),)
     elif optimizer_type == "stable_adamw":
         optimizer = StableAdamWUnfused(
             grouped_params, lr=learning_rate, betas=(beta_1, beta_2),
         )
-    # elif optimizer_type=="Adam8bit":
-    #     optimizer = bnb.optim.Adam8bit(grouped_params, lr=learning_rate, betas=(beta_1, beta_2))
-    # elif optimizer_type=="Lion8Bit":
-    #     optimizer = bnb.optim.Lion8bit(grouped_params, lr=learning_rate, betas=(beta_1, beta_2))
     else:
         raise ValueError(
             "Invalid optimizer_type. Expected 'lion', 'adamw', 'deepspeed' or 'stable_adamw', got: {}".format(
